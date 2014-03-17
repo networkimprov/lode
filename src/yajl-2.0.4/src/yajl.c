@@ -72,6 +72,8 @@ yajl_alloc(const yajl_callbacks * callbacks,
     hand->bytesConsumed = 0;
     hand->decodeBuf = yajl_buf_alloc(&(hand->alloc));
     hand->flags	    = 0;
+    hand->input = NULL;
+    hand->input_length = 0;
     yajl_bs_init(hand->stateStack, &(hand->alloc));
     yajl_bs_push(hand->stateStack, yajl_state_start);
 
@@ -154,7 +156,8 @@ unsigned char *
 yajl_get_error(yajl_handle hand, int verbose,
                const unsigned char * jsonText, size_t jsonTextLen)
 {
-    return yajl_render_error_string(hand, jsonText, jsonTextLen, verbose);
+    return yajl_render_error_string(hand, jsonText ? jsonText : hand->input,
+                                          jsonText ? jsonTextLen : hand->input_length, verbose);
 }
 
 size_t

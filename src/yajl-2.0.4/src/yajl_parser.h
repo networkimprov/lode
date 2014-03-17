@@ -56,6 +56,8 @@ struct yajl_handle_t {
     yajl_alloc_funcs alloc;
     /* bitfield */
     unsigned int flags;
+    const unsigned char* input; // lb: enable resume after client_canceled
+    size_t input_length;
 };
 
 yajl_status
