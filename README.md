@@ -49,13 +49,13 @@ __1) Write a lode module for the library, or the parts of it which you need (dem
     #include <string.h>
     #include "lode.h" // the lode api; it's very simple!
     
-    static unsigned char sReplyErr[] = "{'_id':'%s','error':%d}"; // response templates
-    static unsigned char sReplyCos[] = "{'_id':'%s','cos':%f}";
+    static char sReplyErr[] = "{'_id':'%s','error':%d}"; // response templates
+    static char sReplyCos[] = "{'_id':'%s','cos':%f}";
       // requires "_id" giving the value of _id from message
       // if has "_more", lode.js will retain the callback for that _id
     
     const char* initialize(int argc, char* argv[]) {
-      unsigned char* aReplies[] = { sReplyErr, sReplyCos, NULL };
+      char* aReplies[] = { sReplyErr, sReplyCos, NULL };
       for (int i=0; aReplies[i]; ++i)
         flipQuote(aReplies[i]); // flip ' & " characters
       // initialize the library
@@ -74,13 +74,13 @@ __1) Write a lode module for the library, or the parts of it which you need (dem
       int aLen=0;
       if (aOp && aOp->isString()) {
         // call library
-        if (!strcmp(aOp->s.buf, "cosine")) {
+        if (!strcmp((char*)aOp->s.buf, "cosine")) {
           JsonValue* aNo = aQ.select(sQno).next();
-          if (aNo && aNo->isDouble())
-            aLen = snprintf(aTmp, sizeof(aTmp), sReplyCos, aId->s.buf, cos(aNo->d));
+          if (aNo && (aNo->isDouble() || aNo->isInt()))
+            aLen = snprintf(aTmp, sizeof(aTmp), sReplyCos, aId->s.buf, cos(aNo->isInt() ? aNo->i * 1.0 : aNo->d));
         }
       }
-      if (aLen <= 0 || aLen > sizeof(aTmp)) {
+      if (aLen <= 0 || aLen > (int)sizeof(aTmp)) {
         aLen = snprintf(aTmp, sizeof(aTmp), sReplyErr, aId->s.buf, aLen);
       }
       q->postMsg(aTmp, aLen);
@@ -95,7 +95,7 @@ __2) Write a Node.js api for the library (demo/math.js)__
     
     module.exports.on = function(event, callback) {
       if (typeof event !== 'string' || typeof callback !== 'function')
-        throw new Error("arguments are: String event, Function callback");
+        throw new Error('arguments are: String event, Function callback');
       sEvents[event] = callback;
     };
     
@@ -109,6 +109,8 @@ __2) Write a Node.js api for the library (demo/math.js)__
     };
     
     module.exports.cosine = function(n, callback) {
+      if (typeof n !== 'number' || typeof callback !== 'function')
+        throw new Error('arguments are: Number n, Function callback');
       lode.call(sLib, {op:'cosine',no:n}, callback);
     };
 
@@ -116,7 +118,7 @@ __3) Write a Node.js app using the library api (demo/mathapp.js)__
 
     var math = require('./math.js');
     
-    math.on('connect', funtion() {
+    math.on('connect', function() {
       console.log('math library ready');
       
       var aN = 42;
@@ -132,7 +134,7 @@ __3) Write a Node.js app using the library api (demo/mathapp.js)__
       console.log('math library quit');
     });
     
-    math.init();
+    math.init(null);
     
 __4) Build and run__
 
