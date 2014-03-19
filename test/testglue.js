@@ -27,6 +27,10 @@ module.exports.init = function(parameters) {
   });
 };
 
+module.exports.quit = function() {
+  lode.unload(sLib);
+};
+
 module.exports.getJoy = function(type, callback) {
   lode.call(sLib, {fn:'getJoy', arg:type}, callback);
 };

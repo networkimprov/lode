@@ -13,13 +13,22 @@ var tg = require('./testglue.js');
 tg.on('connect', function() {
   console.log("library ready");
 
+  var aCount=0;
   tg.getJoy('mental', cb);
   function cb(err, joy, more) {
     if (err) throw err;
     console.log('got joy: '+joy.data);
-    if (!more)
+    if (more)
+      return;
+    if (++aCount === 4)
+      tg.quit();
+    else
       setTimeout(tg.getJoy, 2000, 'sensual', cb);
   }
+});
+
+tg.on('status', function(data) {
+  console.log(data);
 });
 
 tg.on('disconnect', function() {

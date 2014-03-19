@@ -24,7 +24,7 @@ module.exports.load = function(iLib, iParams, iNotify) {
     throw new Error('arguments are: String, Object, Function');
   if (iLib in sLib)
     throw new Error(iLib+' already loaded');
-  sLib[iLib] = {notify:iNotify, child:null, socket:null, request:{}};
+  sLib[iLib] = {notify:iNotify, child:null, socket:null, request:{}, quit:false};
 
   if (!sSrvr) {
     sSrvr = lNet.createServer(handleConnect);
@@ -43,7 +43,7 @@ module.exports.load = function(iLib, iParams, iNotify) {
       iNotify('disconnect');
     });
   }
-}
+};
 
 
 module.exports.call = function(iLib, iOp, iCallback) {
@@ -51,10 +51,26 @@ module.exports.call = function(iLib, iOp, iCallback) {
     throw new Error('arguments are: String, Object, Function');
   if (!(iLib in sLib))
     throw new Error(iLib+' not loaded');
+  if (sLib[iLib].quit)
+    throw new Error(iLib+' is unloading');
   iOp._id = (++sId).toString();
   sLib[iLib].request[iOp._id] = iCallback;
   sLib[iLib].socket.write(JSON.stringify(iOp));
-}
+};
+
+
+module.exports.unload = function(iLib) {
+  if (typeof iLib !== 'string')
+    throw new Error('arguments are: String');
+  if (!(iLib in sLib))
+    throw new Error(iLib+' not loaded');
+  if (sLib[iLib].quit)
+    throw new Error(iLib+' already unloading');
+  sLib[iLib].quit = true;
+  for (var any in sLib[iLib].request) break;
+  if (!any)
+    sLib[iLib].socket.end();
+};
 
 
 function handleConnect(iSoc) {
@@ -136,10 +152,16 @@ function handleConnect(iSoc) {
     }
     var aCall = aLib.request[msg._id];
     var aMore = '_more' in msg;
-    if (aMore)
+    if (aMore) {
       delete msg._more;
-    else
+    } else {
       delete aLib.request[msg._id];
+      if (aLib.quit) {
+        for (var any in aLib.request) break;
+        if (!any)
+          aLib.socket.end();
+      }
+    }
     delete msg._id;
     aCall(null, msg, aMore);
   }

@@ -23,11 +23,9 @@
 #include "json.h"
 
 
-static bool sRun = true; // =false when shutdown pending
-static const int kTimeout = 2000; // interval between checks for sRun==false
-
 static int sFd; // socket to parent process
 static int sPollFd; // socket to epoll
+static const int kTimeout = 60*1000; // interval between checks for idle threads
 
 static yajl_handle sParser; // instance of json parser
 static JsonValue* sJsonMsg = NULL; // msg storage until passed to handleMessage
@@ -178,8 +176,7 @@ static void* threadLoop(void* oT) {
       aReady = epoll_wait(sPollFd, &aEv, 1, kTimeout); // one thread waits here
       aReady < 0 && errno_exit("threadLoop epoll_wait");
       if (aReady == 0) {
-        if (!sRun && sBusyCount == 1)
-          exit(0);
+        //. terminate excess threads
       } else if (aEv.events & EPOLLOUT) {fprintf(stderr, "pollout\n");
         aEv.events = EPOLLIN;
         epoll_ctl(sPollFd, EPOLL_CTL_MOD, sFd, &aEv)
@@ -192,6 +189,8 @@ static void* threadLoop(void* oT) {
           aSize = read(sFd, sMsgBuf, sizeof(sMsgBuf));
           if (aSize < 0) {
             errno != EWOULDBLOCK && errno_exit("threadLoop read");
+          } else if (aSize == 0) {
+            exit(0);
           } else if (yajl_parse(sParser, sMsgBuf, aSize) == yajl_status_error) {
             fprintf(stderr, "parser error %s\n", yajl_get_error(sParser, 1, NULL, 0));
             exit(1);
@@ -246,7 +245,7 @@ void ThreadQ::drainQueues(bool iAddQ) {
           epoll_ctl(sPollFd, EPOLL_CTL_MOD, sFd, &aEv)
             && errno_exit("ThreadQ::drainQueues epoll_ctl");
           return;
-        } else if (aLen < aEnt->len - sWrote) {
+        } else if ((size_t)aLen < aEnt->len - sWrote) {
           sWrote += aLen;
         } else {
           sWrote = 0;
