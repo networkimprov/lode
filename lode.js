@@ -24,21 +24,31 @@ module.exports.load = function(iLib, iParams, iNotify) {
     throw new Error('arguments are: String, Object, Function');
   if (iLib in sLib)
     throw new Error(iLib+' already loaded');
-  sLib[iLib] = {notify:iNotify, child:null, socket:null, request:{}, quit:false};
 
   if (!sSrvr) {
+    try {
+    lFs.unlinkSync(sSocketPath);
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+    }
     sSrvr = lNet.createServer(handleConnect);
     sSrvr.listen(sSocketPath, fLoad);
   } else {
     fLoad();
   }
   function fLoad() {
+    sLib[iLib] = {notify:iNotify, child:null, socket:null, request:{}, quit:false};
     var aArgs = [sSocketPath, iLib];
     for (var a in iParams)
       aArgs.push(iParams[a]);
     sLib[iLib].child = lChild.spawn(sShell, aArgs, {stdio:'inherit'}); //. use iParams
     sLib[iLib].child.on('exit', function(code, signal) {
       delete sLib[iLib];
+      for (var any in sLib) break;
+      if (!any) {
+        sSrvr.close();
+        sSrvr = null;
+      }
       iNotify('status', 'shell exit: '+code+' '+signal);
       iNotify('disconnect');
     });
@@ -78,8 +88,6 @@ function handleConnect(iSoc) {
     console.log('library connected but idle');//. disconnect
     aTimer = null;
   }, 2000);
-
-  lFs.unlinkSync(sSocketPath); //. do elsewhere to allow multiple connections
 
   // feed whole json objects to JSON.parse
   // JS needs incremental json parsing!
