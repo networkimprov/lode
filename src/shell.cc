@@ -43,6 +43,8 @@ static HandleMessagePtr handleMessage; // library-specific message processor, de
 typedef const char* (*InitializePtr)(int, char**);
 static InitializePtr initialize; // optional library init function
 
+char gEquator; // used by addrToRef & addrFromRef //. use int if all memory refs aligned that way
+
 static int errno_exit(const char* s) { perror(s); exit(1); return 0; }
 
 

@@ -21,3 +21,11 @@ void handleMessage(JsonValue* op, ThreadQ* q); // must call q->postMsg() and op-
 extern "C"
 const char* initialize(int argc, char* argv[]); // optional
 
+
+extern char gEquator;
+
+inline int addrToRef(void* iAddr) { return (char*)iAddr - &gEquator; }
+
+template <class T>
+inline T* addrFromRef(int iRef) { return (T*) (&gEquator + iRef); }
+

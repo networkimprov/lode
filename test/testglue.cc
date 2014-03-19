@@ -14,6 +14,11 @@
 
 
 const char* initialize(int argc, char* argv[]) {
+  int* aI = new int;
+  *aI = 101010101;
+  int aRef = addrToRef(aI);
+  aI = addrFromRef<int>(aRef);
+  printf("ref %d, value %d\n", aRef, *aI);
   printf("glue lib init'd\n");
   return 0;
 }
