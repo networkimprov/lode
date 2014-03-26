@@ -46,6 +46,5 @@ void handleMessage(JsonValue* iV, ThreadQ* oQ) {
     oQ->postMsg(aResp, snprintf(aResp, sizeof(aResp), flipQuote(aList[a]), aId->s.buf, aId->s.buf));
     usleep(10000);
   }
-  iV->free();
 }
 

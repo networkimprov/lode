@@ -40,6 +40,12 @@ The lode toolkit is currently a Linux-specific prototype.
 
 Feedback and pull requests gratefully considered!
 
+Todo:  
+ - support in-stream BLOBs following JSON data  
+ - connect to multiple Node instances  
+ - terminate idle threads after period of inactivity  
+ - performance test vs Node fs async functions
+
 ###Getting Started
 
 __1) Write a lode module for the library, or the parts of it which you need (demo/math_lode.cc)__
@@ -84,7 +90,6 @@ __1) Write a lode module for the library, or the parts of it which you need (dem
         aLen = snprintf(aTmp, sizeof(aTmp), sReplyErr, aId->s.buf, aLen);
       }
       q->postMsg(aTmp, aLen);
-      op->free();
     }
 
 __2) Write a Node.js api for the library (demo/math.js)__

@@ -192,6 +192,8 @@ static void* threadLoop(void* oT) {
           if (aSize < 0) {
             errno != EWOULDBLOCK && errno_exit("threadLoop read");
           } else if (aSize == 0) {
+            if (sBusyCount > 1)
+              fprintf(stderr, "%u threads active on exit\n", (unsigned int)sBusyCount);
             exit(0);
           } else if (yajl_parse(sParser, sMsgBuf, aSize) == yajl_status_error) {
             fprintf(stderr, "parser error %s\n", yajl_get_error(sParser, 1, NULL, 0));
@@ -216,6 +218,7 @@ static void* threadLoop(void* oT) {
       ++sThreadCount;
     pthread_mutex_unlock(&sBaton);
     handleMessage(aMsg, (ThreadQ*)oT);
+    aMsg->free();
     --sBusyCount;
   }
   return NULL;

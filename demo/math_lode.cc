@@ -47,6 +47,5 @@ void handleMessage(JsonValue* op, ThreadQ* q) {
     aLen = snprintf(aTmp, sizeof(aTmp), sReplyErr, aId->s.buf, aLen);
   }
   q->postMsg(aTmp, aLen);
-  op->free();
 }
 
