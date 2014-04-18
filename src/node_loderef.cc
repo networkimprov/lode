@@ -1,9 +1,21 @@
-#include "node_loderef.h"
+#include <v8.h>
+#include <node.h>
 
-void InitAll(Handle<Object> exports) {
-  LodeRef::Init(exports);
-}
-NODE_MODULE(node_loderef, InitAll)
+using namespace v8;
+using namespace node;
+
+class LodeRef : public node::ObjectWrap {
+public:
+  static void Init(v8::Handle<v8::Object> exports);
+private:
+  LodeRef() {};
+  ~LodeRef();
+  static v8::Handle<v8::Value> New(const v8::Arguments& args);
+  static v8::Persistent<v8::Function> constructor;
+  Persistent<Function> callback;
+};
+
+NODE_MODULE(node_loderef, LodeRef::Init)
 
 Persistent<Function> LodeRef::constructor;
 
