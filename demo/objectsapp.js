@@ -27,6 +27,10 @@ objects.on('connect', function() {
   });  
 });
 
+objects.on('status', function(msg) {
+  console.log(msg);
+});
+
 objects.on('disconnect', function() {
   console.log('objects library quit');
 });

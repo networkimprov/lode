@@ -21,14 +21,14 @@ class MyObject {
 };
 
 static char sReplyErr[] = "{'_id':'%s','error':%d}"; // response templates
-static char sReplyEmpty[] = "{\"_id\":\"%s\"}";
+static char sReplyEmpty[] = "{'_id':'%s'}";
 static char sReplyMyObject[] = "{'_id':'%s','ref':%d}";
 static char sReplyMyObjectCompare[] = "{'_id':'%s','compare':%d}";
   // requires "_id" giving the value of _id from message
   // if has "_more", lode.js will retain the callback for that _id
 
 const char* initialize(int argc, char* argv[]) {
-  char* aReplies[] = { sReplyErr, sReplyMyObject, sReplyMyObjectCompare, NULL };
+  char* aReplies[] = { sReplyErr, sReplyEmpty, sReplyMyObject, sReplyMyObjectCompare, NULL };
   for (int i=0; aReplies[i]; ++i)
     flipQuote(aReplies[i]); // flip ' & " characters
   // initialize the library
