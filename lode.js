@@ -10,7 +10,6 @@
 var lNet = require('net');
 var lChild = require('child_process');
 var lFs = require('fs');
-var lLR = require('./build/Release/node_loderef.node');
 
 
 var sSocketPath = '/tmp/lode.sock';
@@ -184,16 +183,4 @@ function handleConnect(iSoc) {
   });
 
 }
-
-module.exports.LodeRef = function(sLib, ref, msg) {
-  this.ref = ref;
-  this.lr = lLR.LodeRef(function(){
-    module.exports.call(sLib, {op:msg, ref:ref}, function(){});
-  });
-}
-
-module.exports.LodeRef.prototype.get = function() {
-  return this.ref;
-}
-
 

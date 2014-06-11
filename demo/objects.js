@@ -8,6 +8,7 @@
 
 
 var lode = require('../lode.js');
+var lLR = require('../build/Release/node_loderef.node');
 var sLib = __dirname+'/../objects_lode.so';
 var sEvents = {};
 
@@ -41,13 +42,16 @@ module.exports.MyObject = function(s, callback) {
 
 function MyObjectClass(ref) {
   this.type = 'MyObject';
-  this.lodeRef = new lode.LodeRef(sLib, ref, 'MyObjectFree');
+  this.ref = ref;
+  this.lodeRef = lLR.LodeRef(function(){
+    lode.call(sLib, {op:'MyObjectFree', ref:ref}, function(){});
+  });
 }
 
 MyObjectClass.prototype.compare = function(o, callback) {
   if (o.type !== 'MyObject')
     throw new Error('arguments are: MyObject o, Function callback');
-  lode.call(sLib, {op:'MyObjectCompare', ref: this.lodeRef.get(), ref2: o.lodeRef.get()}, function(err, data) {
+  lode.call(sLib, {op:'MyObjectCompare', ref: this.ref, ref2: o.ref}, function(err, data) {
     if (err) { callback(err); return; };
     callback(err, data.compare);
   });
