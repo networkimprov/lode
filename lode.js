@@ -118,11 +118,12 @@ function handleConnect(iSoc) {
             aSet = data.toString('utf8', a1, a2+1);
           }
           try {
-          fMsg(JSON.parse(aSet));
+          var aParsedSet = JSON.parse(aSet);
           } catch (e) {
             e = 'unparsable msg: '+aSet+'. '+e;
             return aLib ? aLib.notify('status', e) : console.log(e);
           }
+          fMsg(aParsedSet);
         }
         break;
       case 0x22: // "
