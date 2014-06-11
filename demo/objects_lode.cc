@@ -21,6 +21,7 @@ class MyObject {
 };
 
 static char sReplyErr[] = "{'_id':'%s','error':%d}"; // response templates
+static char sReplyEmpty[] = "{\"_id\":\"%s\"}";
 static char sReplyMyObject[] = "{'_id':'%s','ref':%d}";
 static char sReplyMyObjectCompare[] = "{'_id':'%s','compare':%d}";
   // requires "_id" giving the value of _id from message
@@ -60,7 +61,7 @@ void handleMessage(JsonValue* op, ThreadQ* q) {
       if (aRefJS && aRefJS->isInt()) {
         MyObject* aObj = addrFromRef<MyObject>(aRefJS->i);
         delete aObj;
-        return;
+        aLen = snprintf(aTmp, sizeof(aTmp), sReplyEmpty, aId->s.buf);
       }
     } else if (!strcmp((char*)aOp->s.buf, "MyObjectCompare")) {
       JsonValue* aRefJS = aQ.select(sQref).next();

@@ -27,8 +27,14 @@ module.exports.init = function(params) {
   });
 };
 
+var aLodeRefCnt = 0;
+var aQuitCalled = false;
 module.exports.quit = function() {
-  lode.unload(sLib);
+  aQuitCalled = true;
+  if (aLodeRefCnt == 0) lode.unload(sLib);
+}
+function checkQuit() {
+  if (aQuitCalled && aLodeRefCnt == 0) module.exports.quit();
 }
 
 module.exports.MyObject = function(s, callback) {
@@ -43,8 +49,9 @@ module.exports.MyObject = function(s, callback) {
 function MyObjectClass(ref) {
   this.type = 'MyObject';
   this.ref = ref;
+  aLodeRefCnt++;
   this.lodeRef = lLR.LodeRef(function(){
-    lode.call(sLib, {op:'MyObjectFree', ref:ref}, function(){});
+    lode.call(sLib, {op:'MyObjectFree', ref:ref}, function(err, data){ aLodeRefCnt--; checkQuit(); });
   });
 }
 

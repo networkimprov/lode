@@ -17,10 +17,11 @@ objects.on('connect', function() {
       obj1.compare(obj2, function (err, result){
         if (err) throw err;
         console.log('obj1.compare(obj2) = ' + result);
-      });
-      obj1.compare(obj1, function (err, result){
-        if (err) throw err;
-        console.log('obj1.compare(obj1) = ' + result);
+        obj1.compare(obj1, function (err, result){
+          if (err) throw err;
+          console.log('obj1.compare(obj1) = ' + result);
+          objects.quit();
+        });
       });
     });
   });  
@@ -33,7 +34,6 @@ objects.on('disconnect', function() {
 setTimeout(function() {
   for (var i = 0; i < 200; i++)
     new Buffer(1000000);
-  objects.quit();
 }, 1000);
 
 objects.init(null);
