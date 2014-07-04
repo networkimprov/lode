@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
   connect(sFd, (sockaddr*) &aAddr, sizeof(sockaddr_un))
     && errno_exit("main connect");
 
-  char aMsg[64];
+  char aMsg[1024];
   write(sFd, aMsg, snprintf(aMsg, sizeof(aMsg), "{\"lib\":\"%s\"}", argv[2])) < 0
     && errno_exit("main write");
 
