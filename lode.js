@@ -13,7 +13,7 @@ var lFs = require('fs');
 
 
 var sSocketPath = '/tmp/lode.sock';
-var sShell = './lode';
+var sShell = __dirname + '/lode';
 var sSrvr = null;
 var sLib = {}; // list of connected libraries
 var sId = 0;   // call id counter
